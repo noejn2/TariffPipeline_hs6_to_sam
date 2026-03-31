@@ -1,0 +1,251 @@
+{
+    "imports": {
+        "C-AGRI": 7.091949287499999e8,
+        "C-COAL": 14630553,
+        "C-COKEOV": 519051499,
+        "C-WATR": 10043,
+        "C-TRNSEQ": 20583897488,
+        "C-CRUD": 628570,
+        "C-PADM": 5.421336790153846e10,
+        "C-TOBC": 13429,
+        "C-STON": 114471004,
+        "C-OMIN": 141779044,
+        "C-MORS": 17955410,
+        "C-BMET": 12462275153,
+        "C-TRNSG": 2.0384239173846157e10,
+        "C-PLAS": 7.318365290615385e9,
+        "C-ELEC": 137080,
+        "C-BEVR": 4081077,
+        "C-FDTEX": 1.571319234325e10
+    },
+    "data": [
+        {
+            "sam": "C-FDTEX",
+            "tariff": 11.173179815505346,
+            "trade_value": 1.571319234325e10,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-AGRI",
+            "tariff": 11.633183002861399,
+            "trade_value": 7.091949287499999e8,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-FDTEX",
+            "tariff": 0,
+            "trade_value": 4.593458049999999e8,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-TRNSG",
+            "tariff": 9.11022093595579,
+            "trade_value": 2.0384239173846157e10,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-AGRI",
+            "tariff": 0,
+            "trade_value": 15245325,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-BEVR",
+            "tariff": 9.848677077153898,
+            "trade_value": 4081077,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-ELEC",
+            "tariff": 14.487153487014881,
+            "trade_value": 137080,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-WATR",
+            "tariff": 11.5,
+            "trade_value": 10043,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-BEVR",
+            "tariff": 0,
+            "trade_value": 98409,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-TOBC",
+            "tariff": 353.560367239698,
+            "trade_value": 13429,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-OMIN",
+            "tariff": 12.101974047730213,
+            "trade_value": 141779044,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-TRNSG",
+            "tariff": 0,
+            "trade_value": 2.3907001835000008e10,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-STON",
+            "tariff": 14.325245981069582,
+            "trade_value": 114471004,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-STON",
+            "tariff": 0,
+            "trade_value": 87649,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-MORS",
+            "tariff": 11.78351761391135,
+            "trade_value": 17955410,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-MORS",
+            "tariff": 0,
+            "trade_value": 2038104142,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-COAL",
+            "tariff": 15,
+            "trade_value": 14630553,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-COKEOV",
+            "tariff": 5.821347360498938,
+            "trade_value": 519051499,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-CRUD",
+            "tariff": 15,
+            "trade_value": 628570,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-BMET",
+            "tariff": 12.988839557962535,
+            "trade_value": 12462275153,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-BMET",
+            "tariff": 0,
+            "trade_value": 246823920,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-PLAS",
+            "tariff": 6.408814150929258,
+            "trade_value": 7.318365290615385e9,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-PADM",
+            "tariff": 6.482557937873151,
+            "trade_value": 5.421336790153846e10,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-PLAS",
+            "tariff": 0,
+            "trade_value": 6587513,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-PADM",
+            "tariff": 0,
+            "trade_value": 489868186,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-TRNSEQ",
+            "tariff": 8.068197223691598,
+            "trade_value": 20583897488,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "CHINA"
+        },
+        {
+            "sam": "C-TRNSEQ",
+            "tariff": 0,
+            "trade_value": 45000,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "CHINA"
+        }
+    ],
+    "exports": {
+        "C-PADM": 489868186,
+        "C-AGRI": 15245325,
+        "C-TRNSG": 2.3907001835000008e10,
+        "C-STON": 87649,
+        "C-PLAS": 6587513,
+        "C-TRNSEQ": 45000,
+        "C-MORS": 2038104142,
+        "C-BMET": 246823920,
+        "C-BEVR": 98409,
+        "C-FDTEX": 4.593458049999999e8
+    }
+}

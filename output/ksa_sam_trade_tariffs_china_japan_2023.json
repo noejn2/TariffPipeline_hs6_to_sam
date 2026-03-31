@@ -1,0 +1,197 @@
+{
+    "imports": {
+        "C-AGRI": 422645458,
+        "C-COAL": 11519998,
+        "C-COKEOV": 1191836979,
+        "C-TRNSEQ": 31972343850,
+        "C-CRUD": 628570,
+        "C-PADM": 26742153330,
+        "C-STON": 15435322,
+        "C-OMIN": 5421975,
+        "C-MORS": 166640,
+        "C-BMET": 11476215015,
+        "C-TRNSG": 8633475918,
+        "C-PLAS": 1141322953,
+        "C-BEVR": 385267,
+        "C-FDTEX": 10459578957
+    },
+    "data": [
+        {
+            "sam": "C-FDTEX",
+            "tariff": 11.152164183619695,
+            "trade_value": 10459578957,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-AGRI",
+            "tariff": 11.95615501929752,
+            "trade_value": 422645458,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-OMIN",
+            "tariff": 14.85193089234089,
+            "trade_value": 5421975,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-BMET",
+            "tariff": 13.141751630208542,
+            "trade_value": 11476215015,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-TRNSG",
+            "tariff": 7.840373581824246,
+            "trade_value": 8633475918,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-PADM",
+            "tariff": 5.960058902888043,
+            "trade_value": 26742153330,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-STON",
+            "tariff": 14.56869639648593,
+            "trade_value": 15435322,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-MORS",
+            "tariff": 13,
+            "trade_value": 166640,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-COAL",
+            "tariff": 15,
+            "trade_value": 11519998,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-COKEOV",
+            "tariff": 5.539873226515597,
+            "trade_value": 1191836979,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-CRUD",
+            "tariff": 15,
+            "trade_value": 628570,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-PLAS",
+            "tariff": 8.225081394424564,
+            "trade_value": 1141322953,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-TRNSEQ",
+            "tariff": 7.932438874671472,
+            "trade_value": 31972343850,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-FDTEX",
+            "tariff": 11.152164183619695,
+            "trade_value": 441680272,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-TRNSG",
+            "tariff": 7.840373581824246,
+            "trade_value": 12199503327,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-PLAS",
+            "tariff": 8.225081394424564,
+            "trade_value": 3452014,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-AGRI",
+            "tariff": 11.95615501929752,
+            "trade_value": 202472,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-BMET",
+            "tariff": 13.141751630208542,
+            "trade_value": 63681485,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-PADM",
+            "tariff": 5.960058902888043,
+            "trade_value": 283155646,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-TRNSEQ",
+            "tariff": 7.932438874671472,
+            "trade_value": 1866592,
+            "year": 2023,
+            "indicator": "Exports",
+            "partner_name": "AGG_COUNTRY"
+        },
+        {
+            "sam": "C-BEVR",
+            "tariff": 0,
+            "trade_value": 385267,
+            "year": 2023,
+            "indicator": "Imports",
+            "partner_name": "AGG_COUNTRY"
+        }
+    ],
+    "exports": {
+        "C-PADM": 283155646,
+        "C-TRNSG": 12199503327,
+        "C-AGRI": 202472,
+        "C-PLAS": 3452014,
+        "C-TRNSEQ": 1866592,
+        "C-BMET": 63681485,
+        "C-FDTEX": 441680272
+    }
+}
