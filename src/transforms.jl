@@ -170,3 +170,23 @@ function aggregate_countries(df::DataFrame)::DataFrame
     result.partner_name .= "AGG_COUNTRY"
     result
 end
+
+# ─── Helper: build uniform 100% tariff DataFrame ─────────────────────────────
+
+"""
+    build_uniform_tariffs(trade_df, year) -> DataFrame
+
+Build a default tariff DataFrame with a uniform 100% rate for every unique
+(indicator, product_code) combination observed in the trade data for `year`.
+Partner is set to `"WORLD"` so it matches all partners via expansion.
+"""
+function build_uniform_tariffs(trade_df::DataFrame, year::Int)::DataFrame
+    subset = filter(r -> r.year == year, trade_df)
+    keys = unique(select(subset, :indicator, :product_code))
+    DataFrame(
+        indicator=keys.indicator,
+        partner_name=fill("WORLD", nrow(keys)),
+        product_code=keys.product_code,
+        value=fill(100.0, nrow(keys)),
+    )
+end

@@ -34,10 +34,8 @@ catch
     error("Year must be a single integer, got: '$year_raw'")
 end
 
-kwargs = (;
-    (length(ARGS) >= 3 ? (tariff_path=ARGS[3],) : (;))...,
-    (length(ARGS) >= 4 ? (cpc_sam_path=ARGS[4],) : (;))...,
-)
+cpc_sam_map = length(ARGS) >= 4 ? ARGS[4] : nothing
+tariff_data = length(ARGS) >= 3 ? ARGS[3] : nothing
 
-hs6_to_sam_pipeline(countries_raw, year; output_dir="output", kwargs...)
+hs6_to_sam_pipeline(countries_raw, year, cpc_sam_map; tariff_data, write_json=true)
 

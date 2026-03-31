@@ -1,173 +1,127 @@
 using TariffPipeline_hs6_to_sam, DataFrames, JSON3, CairoMakie, Printf
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 1.  Run pipeline WITH intermediate tariff nullification (default)
-# ─────────────────────────────────────────────────────────────────────────────
-println("=== Run 1: WITH intermediate nullification ===")
-out_with = hs6_to_sam_pipeline("WORLD", 2023)
-result_with = DataFrame(out_with["data"])
-println("  Rows: $(nrow(result_with))")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 2.  Run pipeline WITHOUT intermediate tariff nullification
-# ─────────────────────────────────────────────────────────────────────────────
-println("=== Run 2: WITHOUT intermediate nullification ===")
-out_without = hs6_to_sam_pipeline("WORLD", 2023; sna_path=nothing)
-result_without = DataFrame(out_without["data"])
-println("  Rows: $(nrow(result_without))")
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 3.  Build simulated IMPORT tariffs: one row per unique import HS6, value = 100.0
-#     All raw tariffs are set to a uniform 100% so we can isolate the effect of
-#     intermediate-input nullification on each SAM sector's trade-weighted tariff.
-#     Sectors with more intermediate HS6 codes will see a larger drop.
-# ─────────────────────────────────────────────────────────────────────────────
-trade_raw = load_trade("data/saudi_reporter.parquet")
-import_hs6 = unique(filter(r -> r.indicator == "Imports" && r.year == 2023, trade_raw).product_code)
-
-tariff_ones = DataFrame(
-    indicator=fill("Imports", length(import_hs6)),
-    partner_name=fill("WORLD", length(import_hs6)),
-    product_code=import_hs6,
-    value=fill(100.0, length(import_hs6)),
-)
-
-println("=== Run 3: WITH intermediate nullification + uniform-100% import tariffs ===")
-out_uniform_with = hs6_to_sam_pipeline("WORLD", 2023; tariff_path=tariff_ones)
-result_uniform_with = DataFrame(out_uniform_with["data"])
-
-println("=== Run 4: WITHOUT intermediate nullification + uniform-100% import tariffs ===")
-out_uniform_without = hs6_to_sam_pipeline("WORLD", 2023; tariff_path=tariff_ones, sna_path=nothing)
-result_uniform_without = DataFrame(out_uniform_without["data"])
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 4.  Build data for scatterplots
+# Test: Intermediate tariff nullification
+#
+# The pipeline always applies BEC/SNA intermediate filtering: HS6 codes
+# classified as intermediate inputs get their tariff zeroed before
+# trade-weighted aggregation. This test uses the default uniform 100%
+# tariff to isolate how much each SAM sector is reduced by the filter.
+#
+# If all HS6 codes in a sector are intermediate → effective tariff = 0%.
+# If none are intermediate → effective tariff stays at 100%.
+# Mixed sectors land in between, proportional to intermediate trade share.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# --- Plot 1: Import tariffs (default KSA bound tariffs) ---
-imp_with = filter(r -> r.indicator == "Imports", result_with)
-imp_without = filter(r -> r.indicator == "Imports", result_without)
-
-# Align on sam
-imp = innerjoin(
-    select(imp_with, :sam, :tariff => :tariff_with),
-    select(imp_without, :sam, :tariff => :tariff_without);
-    on=:sam,
-)
-sort!(imp, :tariff_without)
-
-# --- Plot 2: Import tariffs (simulated uniform 100%) ---
-uni_with = filter(r -> r.indicator == "Imports", result_uniform_with)
-uni_without = filter(r -> r.indicator == "Imports", result_uniform_without)
-
-uni = innerjoin(
-    select(uni_with, :sam, :tariff => :tariff_with),
-    select(uni_without, :sam, :tariff => :tariff_without);
-    on=:sam,
-)
-sort!(uni, :tariff_without)
+# ─────────────────────────────────────────────────────────────────────────────
+# 1.  Run pipeline with default uniform 100% tariff
+#     (intermediate filter always on — reveals each sector's intermediate share)
+# ─────────────────────────────────────────────────────────────────────────────
+println("=== Run 1: Default uniform 100% tariff (intermediate filter always on) ===")
+out_default = hs6_to_sam_pipeline("WORLD", 2023)
+result_default = DataFrame(out_default["data"])
+println("  Rows: $(nrow(result_default))")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5.  Print summary statistics
+# 2.  Run pipeline with KSA bound tariffs
 # ─────────────────────────────────────────────────────────────────────────────
-println("\n=== Import tariff comparison (KSA bound rates, WORLD 2023) ===")
-println("Sector              | Without filter | With filter | Diff")
-println("─"^60)
-for r in eachrow(imp)
-    diff = r.tariff_with - r.tariff_without
-    @printf("%-20s | %14.4f | %11.4f | %+.4f\n",
-        r.sam, r.tariff_without, r.tariff_with, diff)
+println("\n=== Run 2: KSA bound tariffs (intermediate filter always on) ===")
+out_ksa = hs6_to_sam_pipeline("WORLD", 2023;
+    tariff_data="data/ksa_final_bound_tariffs.parquet")
+result_ksa = DataFrame(out_ksa["data"])
+println("  Rows: $(nrow(result_ksa))")
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3.  Build comparison table (imports only)
+# ─────────────────────────────────────────────────────────────────────────────
+imp_default = select(filter(r -> r.indicator == "Imports", result_default), :sam, :tariff => :tariff_uniform)
+imp_ksa = select(filter(r -> r.indicator == "Imports", result_ksa), :sam, :tariff => :tariff_ksa)
+
+cmp = outerjoin(imp_default, imp_ksa; on=:sam)
+for col in [:tariff_uniform, :tariff_ksa]
+    cmp[!, col] = coalesce.(cmp[!, col], 0.0)
+end
+cmp.intermediate_share = 100.0 .- cmp.tariff_uniform  # drop from 100% = intermediate %
+sort!(cmp, :intermediate_share; rev=true)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4.  Print summary
+# ─────────────────────────────────────────────────────────────────────────────
+println("\n=== Import tariff comparison (WORLD 2023) ===")
+println("SAM                  | Uniform 100% → | KSA bound → | Intermediate share")
+println("─"^75)
+for r in eachrow(cmp)
+    @printf("%-20s | %13.2f%% | %10.2f%% | %17.2f%%\n",
+        r.sam, r.tariff_uniform, r.tariff_ksa, r.intermediate_share)
 end
 
-n_lower = count(r -> r.tariff_with < r.tariff_without, eachrow(imp))
-n_same = count(r -> r.tariff_with ≈ r.tariff_without, eachrow(imp))
-println("\n  Sectors where tariff is lower with filter: $n_lower / $(nrow(imp))")
-println("  Sectors unchanged: $n_same / $(nrow(imp))")
+n_fully_intermediate = count(r -> r.tariff_uniform ≈ 0.0, eachrow(cmp))
+n_no_intermediate = count(r -> r.tariff_uniform ≈ 100.0, eachrow(cmp))
+println("\n  Sectors 100% intermediate (tariff → 0%): $n_fully_intermediate / $(nrow(cmp))")
+println("  Sectors 0% intermediate (tariff stays 100%): $n_no_intermediate / $(nrow(cmp))")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 6.  Scatterplots
+# 5.  Plots
 # ─────────────────────────────────────────────────────────────────────────────
 mkpath("assets")
 
-# Helper to determine font size from sector label length
 function abbrev(s, n=10)
     length(s) <= n ? s : s[1:n] * "…"
 end
 
-# ── Plot 1: Import tariffs ──────────────────────────────────────────────────
+# ── Plot 1: Intermediate share by sector (bar chart) ────────────────────────
 let
-    fig = Figure(size=(800, 700))
+    fig = Figure(size=(900, 600))
     ax = Axis(fig[1, 1];
-        xlabel="Tariff rate WITHOUT intermediate filter (%)",
-        ylabel="Tariff rate WITH intermediate filter (%)",
-        title="Import tariffs by SAM sector\n(KSA bound rates, WORLD 2023)",
+        xlabel="SAM sector",
+        ylabel="Effective tariff under uniform 100% (%)",
+        title="Effect of intermediate nullification by SAM sector\n(WORLD imports 2023, uniform 100% baseline)",
+        xticklabelrotation=π / 4,
+        xticks=(1:nrow(cmp), abbrev.(cmp.sam, 12)),
     )
 
-    x = imp.tariff_without
-    y = imp.tariff_with
+    xs = 1:nrow(cmp)
+    barplot!(ax, xs, cmp.tariff_uniform; color=:steelblue, label="Effective tariff")
 
-    # 45-degree reference line
-    lim = max(maximum(x), maximum(y)) * 1.05
-    lines!(ax, [0, lim], [0, lim]; color=:gray70, linestyle=:dash, linewidth=1.5, label="y = x")
+    # Reference line at 100%
+    hlines!(ax, [100.0]; color=:gray70, linestyle=:dash, linewidth=1.5, label="No intermediates (100%)")
 
-    # Points coloured by whether filter reduced the tariff
-    colors = [yi < xi ? :firebrick : :steelblue for (xi, yi) in zip(x, y)]
-    scatter!(ax, x, y; color=colors, markersize=9)
-
-    # Labels for points that differ visibly
-    for (xi, yi, lab) in zip(x, y, imp.sam)
-        abs(yi - xi) > 0.3 && text!(ax, xi, yi; text=abbrev(lab, 12),
-            fontsize=9, offset=(4, 4))
-    end
-
-    # Legend proxy
-    scatter!(ax, Float64[], Float64[]; color=:firebrick, label="Lower with filter")
-    scatter!(ax, Float64[], Float64[]; color=:steelblue, label="Unchanged")
-    axislegend(ax; position=:lt)
+    axislegend(ax; position=:rt)
 
     try
-        save("assets/tariff_comparison_imports.png", fig; px_per_unit=2)
+        save("assets/tariff_intermediate_effect.png", fig; px_per_unit=2)
     catch e
         e isa SystemError || rethrow()
-        @warn "Non-fatal close error writing imports plot" exception = e
+        @warn "Non-fatal close error" exception = e
     end
-    println("Saved: assets/tariff_comparison_imports.png")
+    println("\nSaved: assets/tariff_intermediate_effect.png")
 end
 
-# ── Plot 2: Import tariffs (simulated uniform 100%) ─────────────────────────
+# ── Plot 2: Uniform vs KSA bound tariffs (scatter) ─────────────────────────
 let
     fig = Figure(size=(800, 700))
     ax = Axis(fig[1, 1];
-        xlabel="Tariff rate WITHOUT intermediate filter (%)",
-        ylabel="Tariff rate WITH intermediate filter (%)",
-        title="Import tariffs by SAM sector\n(uniform 100% raw tariffs, WORLD 2023)",
+        xlabel="Effective tariff — uniform 100% baseline (%)",
+        ylabel="Effective tariff — KSA bound rates (%)",
+        title="SAM sector tariffs: uniform 100% vs KSA bound\n(WORLD imports 2023, intermediate filter on)",
     )
 
-    x = uni.tariff_without
-    y = uni.tariff_with
+    x = cmp.tariff_uniform
+    y = cmp.tariff_ksa
 
-    lim = max(maximum(x), maximum(y)) * 1.05
-    lines!(ax, [0, lim], [0, lim]; color=:gray70, linestyle=:dash, linewidth=1.5, label="y = x")
+    scatter!(ax, x, y; color=:firebrick, markersize=9)
 
-    colors = [yi < xi ? :darkorange : :steelblue for (xi, yi) in zip(x, y)]
-    scatter!(ax, x, y; color=colors, markersize=9)
-
-    for (xi, yi, lab) in zip(x, y, uni.sam)
-        abs(yi - xi) > 0.02 && text!(ax, xi, yi; text=abbrev(lab, 12),
-            fontsize=9, offset=(4, 4))
+    for (xi, yi, lab) in zip(x, y, cmp.sam)
+        text!(ax, xi, yi; text=abbrev(lab, 12), fontsize=9, offset=(4, 4))
     end
-
-    scatter!(ax, Float64[], Float64[]; color=:darkorange, label="Lower with filter")
-    scatter!(ax, Float64[], Float64[]; color=:steelblue, label="Unchanged")
-    axislegend(ax; position=:lt)
 
     try
-        save("assets/tariff_comparison_imports_uniform.png", fig; px_per_unit=2)
+        save("assets/tariff_uniform_vs_ksa.png", fig; px_per_unit=2)
     catch e
         e isa SystemError || rethrow()
-        @warn "Non-fatal close error writing uniform imports plot" exception = e
+        @warn "Non-fatal close error" exception = e
     end
-    println("Saved: assets/tariff_comparison_imports_uniform.png")
+    println("Saved: assets/tariff_uniform_vs_ksa.png")
 end
 
 println("\n=== All done ===")

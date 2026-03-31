@@ -52,7 +52,7 @@ The main entry point is `hs6_to_sam_pipeline`, which handles validation, runs th
 ```julia
 using TariffPipeline_hs6_to_sam
 
-# Single country (uses default KSA bound tariffs)
+# Default: uniform 100% tariffs on all HS6 codes
 result = hs6_to_sam_pipeline("CHINA", 2023)
 
 # Multiple countries (aggregated)
@@ -61,17 +61,24 @@ result = hs6_to_sam_pipeline(["CHINA", "JAPAN"], 2023)
 # All partners (WORLD)
 result = hs6_to_sam_pipeline("WORLD", 2023)
 
-# With custom tariff data
-result = hs6_to_sam_pipeline("CHINA", 2023; tariff_path="data/my_tariffs.parquet")
+# With custom tariff data (e.g. KSA bound tariffs)
+result = hs6_to_sam_pipeline("CHINA", 2023; tariff_data="data/ksa_final_bound_tariffs.parquet")
 
-# With a custom CPC→SAM mapping and write output to disk
+# With a custom CPC→SAM mapping and write output JSON to output/
 result = hs6_to_sam_pipeline("CHINA", 2023;
-    cpc_sam_path="assets/mappings/cpc_to_sam/SAMv3-A81-C83-L6-cmap.json",
-    output_dir="output",
+    cpc_sam_map="assets/mappings/cpc_to_sam/SAMv3-A81-C83-L6-cmap.json",
+    write_json=true,
 )
 
 # Pass a pre-loaded DataFrame as tariffs
-result = hs6_to_sam_pipeline("CHINA", 2023; tariff_path=my_tariff_df)
+result = hs6_to_sam_pipeline("CHINA", 2023; tariff_data=my_tariff_df)
+
+# Skip the intermediate goods filter
+result = hs6_to_sam_pipeline("WORLD", 2023; consider_intermediates=false)
+
+# Compare with and without the intermediate filter
+result_with = hs6_to_sam_pipeline("WORLD", 2023; consider_intermediates=true)
+result_without = hs6_to_sam_pipeline("WORLD", 2023; consider_intermediates=false)
 ```
 
 Or run from the terminal:
@@ -88,7 +95,7 @@ julia --project run.jl CHINA 2023 data/ksa_final_bound_tariffs.parquet assets/ma
 
 ```
 INPUT 1: HS6 Trade        INPUT 2: HS6 Tariffs
-(saudi_reporter.parquet)  (ksa_final_bound_tariffs.parquet)
+(saudi_reporter.parquet)  (default: uniform 100%, or custom parquet/DataFrame)
         │                          │
         ▼                          ▼
    Filter by country          Filter by country
@@ -200,38 +207,33 @@ Matching uses longest-prefix: CPC `02131` matches prefix `"021"` → SAM `C-AGRI
 
 | Function | Description |
 |---|---|
-| `hs6_to_sam_pipeline(countries, year; tariff_path, cpc_sam_path, sna_path, output_dir)` | Validates inputs, runs full pipeline, returns output `Dict`. Accepts country string, vector, or `"WORLD"`. Tariff defaults to KSA bound tariffs; can be a path or DataFrame. Pass `sna_path=nothing` to disable intermediate filter. |
+| `hs6_to_sam_pipeline(countries, year; tariff_data, cpc_sam_map, write_json, consider_intermediates)` | Validates inputs, runs full pipeline, returns output `Dict`. Accepts country string, vector, or `"WORLD"`. Tariff defaults to uniform 100% on all HS6 codes; can be a parquet path or DataFrame. Set `consider_intermediates=false` to skip the BEC/SNA intermediate filter (default `true`). Pass `write_json=true` to write output to `output/`. |
 | `load_trade(path)` | Load trade parquet → DataFrame. Exported as a convenience for ad-hoc scripting. |
 
 ### Effect of the intermediate goods filter
 
-The intermediate tariff filter has a material impact on the effective tariff rates that each SAM sector faces. The two plots below compare tariffs **with** vs **without** the filter applied, run against 2023 WORLD aggregated trade.
+The intermediate tariff filter is controlled by the `consider_intermediates` keyword (default `true`). When enabled, HS6 codes classified as intermediate inputs under the UN BEC/SNA system have their tariff zeroed before trade-weighted aggregation. This prevents intermediate goods from inflating the effective tariff that each SAM sector faces. Set `consider_intermediates=false` to skip this step and keep all tariffs as-is.
 
-#### Plot 1 — Import tariffs (KSA bound rates)
+You can compare the two modes side by side:
 
-Points below the dashed 45° line have a lower effective tariff with the filter on. 16 of 17 sectors with any tariff activity are reduced. The largest drops are in heavily intermediate sectors:
+```julia
+result_with    = hs6_to_sam_pipeline("WORLD", 2023; consider_intermediates=true)
+result_without = hs6_to_sam_pipeline("WORLD", 2023; consider_intermediates=false)
+```
 
-| Sector | Without filter | With filter | Drop |
-|---|---|---|---|
-| C-CRUD (Crude oil) | 15.00% | 0.00% | −15.00 pp |
-| C-COAL | 15.00% | 0.00% | −15.00 pp |
-| C-STON (Stone & minerals) | 14.12% | 0.00% | −14.12 pp |
-| C-MORS (Motor vehicles) | 13.45% | 0.00% | −13.45 pp |
-| C-BMET (Basic metals) | 12.01% | 0.00% | −12.01 pp |
-| C-AGRI (Agriculture) | 10.92% | 2.68% | −8.24 pp |
-| C-WATR (Water) | 11.50% | 11.50% | 0 (unchanged) |
+#### Default tariffs (uniform 100% baseline)
 
-C-WATR is the only sector not reduced — its product codes are classified entirely as final consumption or capital goods.
-
-![Import tariff comparison](assets/tariff_comparison_imports.png)
-
-#### Plot 2 — Import tariffs (simulated: all raw rates = 100%)
-
-To isolate how much the intermediate goods filter reduces each sector's effective tariff, all import HS6 codes are assigned a uniform 100% tariff. Without the filter, every sector would show exactly 100%. With the filter enabled, sectors containing intermediate HS6 codes see their trade-weighted tariff drop below 100% — the more intermediate trade value in a sector, the larger the drop.
+The default tariff is a uniform 100% rate on every HS6 code. This isolates the structural effect of the intermediate filter: the drop from 100% for each sector equals its trade-weighted intermediate share.
 
 Sectors whose entire import basket is intermediate goods (C-COAL, C-CRUD, C-OMIN, C-STON, C-BMET) collapse from 100% to exactly 0%. Mixed sectors like C-AGRI and C-PADM land between 0% and 100% depending on the intermediate share of their import value. Only C-WATR remains at the full 100%, indicating it is composed entirely of final or capital goods.
 
-![Import tariff simulation (uniform 100%)](assets/tariff_comparison_imports_uniform.png)
+![Intermediate effect by sector](assets/tariff_intermediate_effect.png)
+
+#### KSA bound tariffs
+
+When run with `tariff_data="data/ksa_final_bound_tariffs.parquet"`, the same intermediate filter produces real-world effective tariff rates. The scatter below compares each sector's effective tariff under the uniform 100% baseline (x-axis) vs KSA bound rates (y-axis).
+
+![Uniform vs KSA tariffs](assets/tariff_uniform_vs_ksa.png)
 
 ### Data cleaning notes
 

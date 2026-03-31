@@ -61,18 +61,42 @@ function validate_tariff_data(tariff_df::DataFrame, countries::Vector{<:Abstract
 end
 
 """
-    validate_cpc_sam_path(cpc_sam_path)
+    validate_cpc_sam_map(cpc_sam_map)
 
-When `cpc_sam_path` is a String, verify that the file exists and has a `.json` extension.
+When `cpc_sam_map` is a String, verify that the file exists and has a `.json` extension.
 No-op when a pre-loaded Dict is passed.
 """
-function validate_cpc_sam_path(cpc_sam_path)
-    if cpc_sam_path isa String
-        if !isfile(cpc_sam_path)
-            error("CPC→SAM mapping file not found: $cpc_sam_path")
+function validate_cpc_sam_map(cpc_sam_map)
+    if cpc_sam_map isa String
+        if !isfile(cpc_sam_map)
+            error("CPC→SAM mapping file not found: $cpc_sam_map")
         end
-        if !endswith(cpc_sam_path, ".json")
-            error("CPC→SAM mapping must be a JSON file, got: $cpc_sam_path")
+        if !endswith(cpc_sam_map, ".json")
+            error("CPC→SAM mapping must be a JSON file, got: $cpc_sam_map")
         end
+    end
+end
+
+# ─── Helper: check partner availability ───────────────────────────────────────
+
+"""
+    check_partners(countries) -> Bool
+
+Check whether a country or list of countries exists in the trade data.
+Accepts a single `String` or a `Vector{String}`. Returns `true` if all
+countries are found, `false` otherwise. Prints which are missing.
+"""
+function check_partners(countries::Union{String,Vector{String}})::Bool
+    trade_df = load_trade(TRADE_PATH)
+    available = Set(unique(trade_df.partner_name))
+    names_list = countries isa Vector ? countries : [strip(c) for c in split(countries, ",")]
+    missing_c = filter(c -> !(c in available), names_list)
+    if isempty(missing_c)
+        println("All partners found: $(join(names_list, ", "))")
+        return true
+    else
+        println("Missing partners: $(join(missing_c, ", "))")
+        println("Available ($(length(available))): $(join(sort(collect(available)), ", "))")
+        return false
     end
 end

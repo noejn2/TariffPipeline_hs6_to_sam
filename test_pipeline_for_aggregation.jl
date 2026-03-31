@@ -20,8 +20,7 @@ country_a = "CHINA"
 country_b = "JAPAN"
 
 # Confirm they exist
-@assert country_a in all_partners "$(country_a) not found in trade data"
-@assert country_b in all_partners "$(country_b) not found in trade data"
+@assert check_partners([country_a, country_b]) "One or more countries not found in trade data"
 
 # ── 2. Build per-country tariff DataFrames ──────────────────────────────────
 #    country_a gets 10% on all imports, country_b gets 20%.
@@ -48,18 +47,18 @@ println("\nTariff rows: $(country_a)=$(nrow(tariff_a)), $(country_b)=$(nrow(tari
 
 # ── 3. Run pipeline: individual countries ───────────────────────────────────
 println("\n=== Run 1: $(country_a) alone (10% tariff) ===")
-out_a = hs6_to_sam_pipeline(country_a, yr; tariff_path=tariff_a, sna_path=nothing)
+out_a = hs6_to_sam_pipeline(country_a, yr; tariff_data=tariff_a)
 result_a = DataFrame(out_a["data"])
 println("  Rows: $(nrow(result_a))")
 
 println("\n=== Run 2: $(country_b) alone (20% tariff) ===")
-out_b = hs6_to_sam_pipeline(country_b, yr; tariff_path=tariff_b, sna_path=nothing)
+out_b = hs6_to_sam_pipeline(country_b, yr; tariff_data=tariff_b)
 result_b = DataFrame(out_b["data"])
 println("  Rows: $(nrow(result_b))")
 
 # ── 4. Run pipeline: both countries at once (internal aggregation) ──────────
 println("\n=== Run 3: $(country_a),$(country_b) aggregated (pipeline handles it) ===")
-out_ab = hs6_to_sam_pipeline("$(country_a),$(country_b)", yr; tariff_path=tariff_ab, sna_path=nothing)
+out_ab = hs6_to_sam_pipeline("$(country_a),$(country_b)", yr; tariff_data=tariff_ab)
 result_ab = DataFrame(out_ab["data"])
 println("  Rows: $(nrow(result_ab))")
 
