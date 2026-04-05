@@ -37,8 +37,8 @@ HS6 → CPC → SAM pipeline, and returns a Dict with keys `"data"`, `"imports"`
 function hs6_to_sam_pipeline(
     countries_raw::Union{String,Vector{String}},
     year::Int,
-    cpc_sam_map::Union{Dict,String,Nothing}=DEFAULT_CPC_SAM_MAP;
-    tariff_data::Union{DataFrame,String,Nothing}=nothing,
+    cpc_sam_map::Union{Dict,String,Nothing}=DEFAULT_CPC_SAM_MAP,
+    tariff_data::Union{DataFrame,String,Nothing}=nothing;
     write_json::Bool=false,
     consider_intermediates::Bool=true,
 )::Dict
